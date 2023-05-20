@@ -16,12 +16,12 @@ class RecordSchema(ModelSchema):
         unknown = INCLUDE
 
     # Add extra fields back into output
-    # @post_dump(pass_original=True)
-    # def keep_unknowns(self, output, orig, **kwargs):
-    #     for key in orig:
-    #         if key not in output and not isinstance(orig[key],GridFSProxy):
-    #             output[key] = orig[key]
-    #     return output
+    @post_dump(pass_original=True)
+    def keep_unknowns(self, output, orig, **kwargs):
+        for key in orig:
+            if key not in output and not isinstance(orig[key],GridFSProxy):
+                output[key] = orig[key]
+        return output
 
 account_schema = AccountSchema()
 record_schema = RecordSchema()

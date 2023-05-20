@@ -5,7 +5,7 @@ from marshmallow import ValidationError
 from datetime import datetime
 
 from data.model import Record
-from data.schema import record_schema
+from data.schema import RecordSchema, record_schema
 
 record_api = Blueprint("record_api", __name__)
 
@@ -33,12 +33,30 @@ def create():
     except ValidationError as err:
         return jsonify(err.messages), 400
 
+    # Due to record has unknown=INCLUDE, have to remove id here
+    delattr(new_record, "id")
+
     uploader = get_current_user()
     new_record.uploader_name = uploader.name
 
     new_record.upload_datetime = datetime.now()
     new_record.save()
     return record_schema.dump(new_record)
+
+
+# Attribute not inside request json will get deleted.
+@record_api.put("/")
+@jwt_required()
+def update():
+    try:
+        record_schema = RecordSchema()
+        modify_record: Record = record_schema.load(request.get_json())
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    modify_record.upload_datetime = datetime.now()
+    modify_record.save()
+    return record_schema.dump(modify_record)
 
 
 @record_api.delete("/<id>")
