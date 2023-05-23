@@ -9,7 +9,7 @@ from extensions.jwt import jwt
 def create_app():
     app = Flask(__name__)
 
-    # Default configurations
+    # Default configurations for development
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 600
     app.config["MONGODB_SETTINGS"] = [
         {
