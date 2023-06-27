@@ -4,7 +4,7 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     jwt_required,
-    get_jwt_identity,
+    get_current_user,
 )
 from datetime import timedelta
 from data.model import Account
@@ -37,7 +37,7 @@ def login():
 @auth_api.post("/refresh")
 @jwt_required(refresh=True)
 def refresh_access_token():
-    current_user = get_jwt_identity()
+    current_user = get_current_user()
 
     exp_timestamp: timedelta = app.config["JWT_ACCESS_TOKEN_EXPIRES"]
     return {
