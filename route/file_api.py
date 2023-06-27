@@ -13,11 +13,11 @@ file_api = Blueprint("file_api", __name__)
 def upload():
     db = get_db()
     gfs = gridfs.GridFS(db)
-    res = []
+    res = {}
 
     for key,file in request.files.items(multi=True):
         id = gfs.put(file, content_type=file.content_type, filename=file.filename)
-        res.append({"file_name": file.filename, "url": f"/file/{id}"})
+        res[key if len(key) != 0 else file.filename] = {"file_name": file.filename, "url": f"/file/{id}","post_field_name": key}
 
     return jsonify(res)
 
