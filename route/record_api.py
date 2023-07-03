@@ -3,6 +3,7 @@ from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import jwt_required, get_current_user
 from marshmallow import ValidationError
 from datetime import datetime
+import mongoengine
 
 from data.model import Record
 from data.schema import RecordSchema, record_schema
@@ -19,9 +20,13 @@ def get_all():
 
 @record_api.get("/<id>")
 def get_by_id(id: str):
-    record: Optional[Record] = Record.objects(id=id).first()
+    try:
+        record: Optional[Record] = Record.objects(id=id).first()
+    except mongoengine.errors.ValidationError:
+        return jsonify(f"Invalid id: {id}"), 400
+
     if not record:
-        return jsonify(f"Record not found for record {id}"), 404
+        return jsonify(f"Record not found for id: {id}"), 404
     return record_schema.dump(record)
 
 

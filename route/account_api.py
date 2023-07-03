@@ -4,19 +4,25 @@ from flask_jwt_extended import jwt_required, get_current_user
 from marshmallow import ValidationError
 from data.model import Account
 from data.schema import account_schema
+import mongoengine
 
 account_api = Blueprint("account_api", __name__)
 
-@account_api.get('/')
+
+@account_api.get("/")
 @jwt_required()
 def get_all():
-    return account_schema.dump(Account.objects(),many=True)
+    return account_schema.dump(Account.objects(), many=True)
 
 
 @account_api.get("/<id>")
 @jwt_required()
 def get(id):
-    account = Account.objects(id=id).first()
+    try:
+        account = Account.objects(id=id).first()
+    except mongoengine.errors.ValidationError:
+        return jsonify(f"Invalid id: {id}"), 400
+
     if not account:
         return jsonify({"error": f"Account for id {id} not found"}), 404
 
