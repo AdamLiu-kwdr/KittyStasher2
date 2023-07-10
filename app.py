@@ -1,10 +1,11 @@
 from flask import Flask
-from data.model import db, seed_data
+from data.model import db, create_default_admin
 from route.record_api import record_api
 from route.auth_api import auth_api
 from route.file_api import file_api
 from route.account_api import account_api
 from extensions.jwt import jwt
+
 
 def create_app():
     app = Flask(__name__)
@@ -30,6 +31,13 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    seed_data(db)
+    if app.debug == True:
+        create_default_admin(db, "admin", "default_password")
+    else:
+        create_default_admin(
+            db,
+            app.config.get("KITTY_STASHER_ADMIN", "admin"),
+            app.config.get("KITTY_STASHER_PASSWORD"),
+        )
 
     return app

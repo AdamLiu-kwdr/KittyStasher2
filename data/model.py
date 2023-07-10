@@ -10,6 +10,7 @@ from mongoengine import (
 
 db = MongoEngine()
 
+
 class Account(Document):
     name = StringField(Required=True)
     pass_hash = StringField(Required=True)  # Password hash, NOT password itself.
@@ -28,13 +29,16 @@ class Record(DynamicDocument):
     extra_notes = StringField()
     uploader_name = StringField()
     upload_datetime = DateTimeField()
-    meta = {'strict': False} # Allows extra optional fields for extension
+    meta = {"strict": False}  # Allows extra optional fields for extension
 
 
-# TODO: feed password from env!
-def seed_data(db):
-    from datetime import datetime
+def create_default_admin(db, account_name, password):
     if Account.objects().count() == 0:
-        new_admin = Account(name = "admin",role = "admin")
-        new_admin.modify_password_hash("default_password")
+        if password is None:
+            raise Exception(
+                "Default admin password not configured! Did you forgot to set FLASK_KITTY_STASHER_PASSWORD?"
+            )
+
+        new_admin = Account(name=account_name, role=password)
+        new_admin.modify_password_hash(password)
         new_admin.save()
