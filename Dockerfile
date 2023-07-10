@@ -12,4 +12,4 @@ COPY . /app
 
 USER flaskuser
 EXPOSE 5000
-CMD ["gunicorn", "--access-logfile", "-", "--error-logfile", "-", "-w", "4", "-b", ":5000", "wsgi:application"]
+CMD ["gunicorn", "--access-logfile", "-", "--error-logfile", "-", "-w", "4", "-k","4", "-b", ":5000", "wsgi:application"]
