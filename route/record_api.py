@@ -6,14 +6,24 @@ from datetime import datetime
 import mongoengine
 
 from data.model import Record
-from data.schema import RecordSchema, record_schema
+from data.schema import (
+    RecordSchema,
+    record_schema,
+    record_query_schema,
+)
 
 record_api = Blueprint("record_api", __name__)
 
 
 @record_api.get("/")
-def get_all():
-    records = Record.objects()
+def get_by_query():
+    try:
+        args = request.args
+        param = record_query_schema.load(args.to_dict())
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    records = Record.objects(**param)
     res = record_schema.dump(records, many=True)
     return res
 
