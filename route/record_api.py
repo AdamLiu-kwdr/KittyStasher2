@@ -10,6 +10,7 @@ from data.schema import (
     RecordSchema,
     record_schema,
     record_query_schema,
+    pagination_schema,
 )
 
 record_api = Blueprint("record_api", __name__)
@@ -18,12 +19,15 @@ record_api = Blueprint("record_api", __name__)
 @record_api.get("/")
 def get_by_query():
     try:
-        args = request.args
-        param = record_query_schema.load(args.to_dict())
+        query = record_query_schema.load(request.args.to_dict())
+        pagination = pagination_schema.load(request.args.to_dict())
     except ValidationError as err:
         return jsonify(err.messages), 400
 
-    records = Record.objects(**param)
+    page = pagination.get("page", 1)
+    page_size = pagination.get("page_size", Record.objects.count())
+
+    records = Record.objects(**query).skip((page - 1) * page_size).limit(page_size)
     res = record_schema.dump(records, many=True)
     return res
 

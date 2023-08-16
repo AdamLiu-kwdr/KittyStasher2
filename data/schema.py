@@ -41,3 +41,15 @@ class RecordQuerySchema(Schema):
 
 
 record_query_schema = RecordQuerySchema()
+
+
+# For pagination query from URL parameters
+class PaginationSchema(Schema):
+    page = fields.Integer()
+    page_size = fields.Integer()
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+pagination_schema = PaginationSchema()
