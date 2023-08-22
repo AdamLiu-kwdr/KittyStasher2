@@ -9,7 +9,7 @@ import mongoengine
 account_api = Blueprint("account_api", __name__)
 
 
-@account_api.get("/")
+@account_api.get("")
 @jwt_required()
 def get_all():
     return account_schema.dump(Account.objects(), many=True)
@@ -35,7 +35,7 @@ def check_login_role(role: str):
         abort(403, jsonify({"error": f"Action not authorized, {role} account only."}))
 
 
-@account_api.post("/")
+@account_api.post("")
 @jwt_required()
 def create():
     check_login_role("admin")
@@ -55,7 +55,7 @@ def create():
     return account_schema.dump(new_account)
 
 
-@account_api.put("/")
+@account_api.put("")
 @jwt_required()
 def update():
     check_login_role("admin")
