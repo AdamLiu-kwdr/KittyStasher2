@@ -29,7 +29,12 @@ def get_by_query():
     page_size = pagination.get("page_size", Record.objects.count())
     total_pages = math.ceil(Record.objects(**query).count() / page_size)
 
-    records = Record.objects(**query).skip((page - 1) * page_size).limit(page_size)
+    records = (
+        Record.objects(**query)
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+        .order_by("-upload_datetime")
+    )
     res = record_schema.dump(records, many=True)
     return {"data": res, "pages": total_pages, "current_page": page}
 
