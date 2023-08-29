@@ -12,7 +12,8 @@
             "env": {
                 "FLASK_APP": "app.py",
                 "FLASK_DEBUG": "1",
-                "FLASK_JWT_SECRET_KEY":"default_password"
+                "FLASK_JWT_SECRET_KEY": "default_password",
+                "FLASK_ENV": "development",
             },
             "args": [
                 "run",

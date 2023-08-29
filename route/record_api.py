@@ -4,18 +4,39 @@ from flask_jwt_extended import jwt_required, get_current_user
 from marshmallow import ValidationError
 from datetime import datetime
 import mongoengine
+import math
 
 from data.model import Record
-from data.schema import RecordSchema, record_schema
+from data.schema import (
+    RecordSchema,
+    record_schema,
+    record_query_schema,
+    pagination_schema,
+)
 
 record_api = Blueprint("record_api", __name__)
 
 
-@record_api.get("/")
-def get_all():
-    records = Record.objects()
+@record_api.get("")
+def get_by_query():
+    try:
+        query = record_query_schema.load(request.args.to_dict())
+        pagination = pagination_schema.load(request.args.to_dict())
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    page = pagination.get("page", 1)
+    page_size = pagination.get("page_size", Record.objects.count())
+    total_pages = math.ceil(Record.objects(**query).count() / page_size)
+
+    records = (
+        Record.objects(**query)
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+        .order_by("-upload_datetime")
+    )
     res = record_schema.dump(records, many=True)
-    return res
+    return {"data": res, "pages": total_pages, "current_page": page}
 
 
 @record_api.get("/<id>")
@@ -30,7 +51,7 @@ def get_by_id(id: str):
     return record_schema.dump(record)
 
 
-@record_api.post("/")
+@record_api.post("")
 @jwt_required()
 def create():
     try:
@@ -50,7 +71,7 @@ def create():
 
 
 # Attribute not inside request json will get deleted.
-@record_api.put("/")
+@record_api.put("")
 @jwt_required()
 def update():
     try:

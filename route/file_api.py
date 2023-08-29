@@ -9,7 +9,7 @@ from flask import Blueprint, request, jsonify, make_response, send_file
 file_api = Blueprint("file_api", __name__)
 
 
-@file_api.post("/")
+@file_api.post("")
 @jwt_required()
 def upload():
     db = get_db()
